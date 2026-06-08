@@ -1,9 +1,169 @@
 import gimnasia.*
+import personas.*
+import clubes.*
+describe "rutinas -> RUNNING!" {
 
-describe "rutinas" {
+	test "running: Correr en la playa por 5 minutos." {
+		const correrEnLaPlaya = new Running(intensidad = 1.2)
+
+		assert.equals(360, correrEnLaPlaya.caloriasQuemadas(5))
+	}
+	test "running: Correr en la playa por 90 minutos." {
+		const correrEnLaPlaya = new Running(intensidad = 1.2)
+
+		assert.equals(10200, correrEnLaPlaya.caloriasQuemadas(90))
+	}
+	test "running: La maraton de BA por 5 minutos."{
+		const maratonBA = new Maraton(intensidad = 1.5)
+
+		assert.equals(900, maratonBA.caloriasQuemadas(5))
+	}
+	test "running: La maraton de BA por 90 minutos."{
+		const maratonBA = new Maraton(intensidad = 1.5)
+
+		assert.equals(25500, maratonBA.caloriasQuemadas(90))
+	}
+}
+
+describe "rutinas -> REMO!" {
+	test "remo: Remar en el delta por 5 minutos." {
+		const remarEnElDelta = new Remo()
+
+		assert.equals(520, remarEnElDelta.caloriasQuemadas(5))
+	}
+	test "remo: Remar en el delta por 90 minutos." {
+		const remarEnElDelta = new Remo()
+
+		assert.equals(9360, remarEnElDelta.caloriasQuemadas(90))
+	}
+	test "remo competitivo: Remar en camino de remeros por 5 minutos." {
+		const remarEnCaminoRemeros = new RemoCompetitivo()
+
+		assert.equals(510, remarEnCaminoRemeros.caloriasQuemadas(5))
+	}
+	test "remo competitivo: Remar en camino de remeros por 90 minutos." {
+		const remarEnCaminoRemeros = new RemoCompetitivo()
+
+		assert.equals(12750, remarEnCaminoRemeros.caloriasQuemadas(90))
+	}
+}
+describe "personas -> Calamardo el sedentario" {
+
+	var correrEnLaPlaya
+	var maratonBA
+	var remarEnElDelta	
+	var remarEnCaminoRemeros
+
+	method initialize() {
+		correrEnLaPlaya = new Running(intensidad = 1.2)
+		maratonBA = new Maraton(intensidad = 1.5)
+		remarEnElDelta = new Remo()
+		remarEnCaminoRemeros = new RemoCompetitivo()
+	}
+	test "Calamardo corre en la playa" {
+		const calamardo = new PersonaSedentaria(peso = 60, tiempo = 5)
+
+		calamardo.ejercitar(correrEnLaPlaya)
+        assert.equals(59.948, calamardo.peso().truncate(3))
+	}
+	test "Calamardo corre la maraton de BA" {
+		const calamardo = new PersonaSedentaria(peso = 60, tiempo = 5)
+
+		calamardo.ejercitar(maratonBA)
+		assert.equals(59.871, calamardo.peso().truncate(3))
+	}
+	test "Calamardo rema en el delta" {
+		const calamardo = new PersonaSedentaria(peso = 60, tiempo = 5)
+
+		calamardo.ejercitar(remarEnElDelta)
+		assert.equals(59.925, calamardo.peso().truncate(3))
+	}
+	test "Calamardo rema en camino de remeros" {
+		const calamardo = new PersonaSedentaria(peso = 60, tiempo = 5)
+
+		calamardo.ejercitar(remarEnCaminoRemeros)
+		assert.equals(59.927, calamardo.peso().truncate(3))
+	}
+	test "Calamardo no puede practicar" {
+		const calamardo = new PersonaSedentaria(peso = 40, tiempo = 5)
+
+		assert.throwsException({calamardo.ejercitar(correrEnLaPlaya)})
+		assert.equals(40, calamardo.peso())
+	}
+}
+
+describe "personas -> BOB!" {
+	var correrEnLaPlaya
+	var maratonBA
+	var remarEnElDelta	
+	var remarEnCaminoRemeros
+	var bob
+
+	method initialize() {
+		correrEnLaPlaya = new Running(intensidad = 1.2)
+		maratonBA = new Maraton(intensidad = 1.5)
+		remarEnElDelta = new Remo()
+		remarEnCaminoRemeros = new RemoCompetitivo()
+		bob = new PersonaAtleta(peso = 40)
+	}
+	test "bobi corre en la playa" {
+		bob.ejercitar(correrEnLaPlaya)
+		assert.equals(39.725, bob.peso().truncate(3))
+	}
+	test "bobi corre la maraton de BA" {
+		bob.ejercitar(maratonBA)
+		assert.equals(37.812, bob.peso().truncate(3))
+	}
+	test "bobi no puede remar en el delta" {
+		assert.throwsException({bob.ejercitar(remarEnElDelta)})
+		assert.equals(40, bob.peso())
+	}
+	test "bobi rema en camino de remeros" {
+		bob.ejercitar(remarEnCaminoRemeros)
+		assert.equals(39.406, bob.peso().truncate(3))
+	}
+}
+describe "clubes -> Club Barrial"{
+	var correrEnLaPlaya
+    var maratonBA
+    var remoDelta
+    var caminoRemeros
+    var predioNautico
+    var predioRecreo
+    var clubBarrial
+    var bob
+    var calamardo
+	
+	method initialize(){
+		correrEnLaPlaya = new Running(intensidad = 1.2)
+		maratonBA = new Maraton(intensidad = 1.5)
+		remoDelta = new Remo()
+		caminoRemeros = new RemoCompetitivo()
+		predioNautico = new Predio(rutinas = [remoDelta, caminoRemeros])
+		predioRecreo = new Predio(rutinas = [correrEnLaPlaya, maratonBA])
+		clubBarrial = new Club(predios = [predioRecreo, predioNautico])
+		bob = new PersonaAtleta(peso = 40)
+		calamardo = new PersonaSedentaria(peso = 60, tiempo = 5)
+	}
+	test "El mejor predio del club para Bob es el recreo" {
+        assert.equals(predioRecreo, clubBarrial.mejorPredioPara(bob))
+    }
+	test "El mejor predio del club para Calamardo es el recreo" {
+		assert.equals(predioRecreo, clubBarrial.mejorPredioPara(calamardo))
+	}
+	test "No hay predios tranquis para Bob" {
+		assert.equals([], clubBarrial.prediosTranquisPara(bob))
+	}
+	test "El predio tranqui para Calamardo es el recreo" {
+		assert.equals([predioRecreo], clubBarrial.prediosTranquisPara(calamardo))
+	}
+	test "Rutinas más exigentes para Bob" {
+        assert.equals(#{maratonBA, caminoRemeros}, clubBarrial.rutinasMasExigentesPara(bob))
+    }
+}
 
 //Punto 1: rutinas
-//	const correrEnLaPlaya = // Una actividad de running con intensisdad 1.2
+//	const correrEnLaPlaya = // Un{a actividad de running con intensisdad 1.2
 //	const remarEnElDelta = // Una actividad de remo
 //	const remarEnCaminoRemeros = // Una actividad de remo comptetitivo
 //	const maratonBA = //Una maraton con intensidad 1.5
@@ -105,4 +265,3 @@ describe "rutinas" {
 //		//Las rutinas más exigentes del clubBarrial para calamardo son maratonBA y remarEnElDelta
 //	}
 	
-}
